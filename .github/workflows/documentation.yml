@@ -15,16 +15,17 @@ jobs:
   build_documentation:
     # The type of runner that the job will run on
     runs-on: ubuntu-22.04
+    # Allows the job to push to the gh-pages branch
+    permissions:
+      contents: write
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install dependencies
         run: |
-            sudo apt-get update -qq
-            sudo apt-get install -y -qq python3-sphinx
             cd ./doc/sphinx/
             python3 -m venv .venv
             source .venv/bin/activate
@@ -35,10 +36,13 @@ jobs:
             source .venv/bin/activate
             make html
             cd ../..
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v5
+        with:
+          ref: gh-pages
+          path: gh-pages
       - name: Create commit
         run: |
-            git clone https://github.com/johaaaaaaaaaaaaaaaaan/info_indus_tutorial.git --branch gh-pages --single-branch gh-pages
-            mkdir -p gh-pages/docs/
             cp -r ./doc/sphinx/build/html/* gh-pages/
             cd gh-pages
             git config --local user.email "action@github.com"
